@@ -151,5 +151,143 @@ async function getBookings(req, res) {
   }
 }
 
+/**
+ * PUT /bookings/:bookingId
+ */
+async function updateBooking(req, res) {
+  try {
+    const { bookingId } = req.params;
+    const { carName, days, rentPerDay, status } = req.body;
+    const { userId } = req.user;
 
-module.exports = { testBooking, createBooking, getBookings };
+    // 1️⃣ Find booking
+    const booking = await prisma.booking.findUnique({
+      where: { id: Number(bookingId) },
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        error: "booking not found",
+      });
+    }
+
+    // 2️⃣ Ownership check
+    if (booking.userId !== userId) {
+      return res.status(403).json({
+        success: false,
+        error: "booking does not belong to user",
+      });
+    }
+
+    // 3️⃣ Update status only
+    if (status) {
+      if (!["booked", "completed", "cancelled"].includes(status)) {
+        return res.status(400).json({
+          success: false,
+          error: "invalid inputs",
+        });
+      }
+
+      await prisma.booking.update({
+        where: { id: booking.id },
+        data: { status },
+      });
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          message: "Booking updated successfully",
+        },
+      });
+    }
+
+    // 4️⃣ Update booking details
+    if (!carName || !days || !rentPerDay) {
+      return res.status(400).json({
+        success: false,
+        error: "invalid inputs",
+      });
+    }
+
+    if (days >= 365 || rentPerDay > 2000) {
+      return res.status(400).json({
+        success: false,
+        error: "invalid inputs",
+      });
+    }
+
+    await prisma.booking.update({
+      where: { id: booking.id },
+      data: {
+        carName,
+        days,
+        rentPerDay,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        message: "Booking updated successfully",
+      },
+    });
+  } catch (error) {
+    console.error("UPDATE BOOKING ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Something went wrong",
+    });
+  }
+}
+
+/**
+ * DELETE /bookings/:bookingId
+ */
+async function deleteBooking(req, res) {
+  try {
+    const { bookingId } = req.params;
+    const { userId } = req.user;
+
+    // 1️⃣ Find booking
+    const booking = await prisma.booking.findUnique({
+      where: { id: Number(bookingId) },
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        error: "booking not found",
+      });
+    }
+
+    // 2️⃣ Ownership check
+    if (booking.userId !== userId) {
+      return res.status(403).json({
+        success: false,
+        error: "booking does not belong to user",
+      });
+    }
+
+    // 3️⃣ Delete booking
+    await prisma.booking.delete({
+      where: { id: booking.id },
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        message: "Booking deleted successfully",
+      },
+    });
+  } catch (error) {
+    console.error("DELETE BOOKING ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Something went wrong",
+    });
+  }
+}
+
+
+module.exports = { testBooking, createBooking, getBookings, updateBooking, deleteBooking };
