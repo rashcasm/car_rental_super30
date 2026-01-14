@@ -65,7 +65,7 @@ async function getBookings(req, res) {
     const { bookingId, summary } = req.query;
     const { userId, username } = req.user;
 
-    // 1️⃣ SUMMARY MODE
+    // SUMMARY MODE
     if (summary === "true") {
       const bookings = await prisma.booking.findMany({
         where: {
@@ -93,7 +93,7 @@ async function getBookings(req, res) {
       });
     }
 
-    // 2️⃣ SINGLE BOOKING MODE
+    //  SINGLE BOOKING MODE
     if (bookingId) {
       const booking = await prisma.booking.findFirst({
         where: {
@@ -124,7 +124,7 @@ async function getBookings(req, res) {
       });
     }
 
-    // 3️⃣ NORMAL LIST MODE
+    // NORMAL LIST MODE
     const bookings = await prisma.booking.findMany({
       where: { userId },
     });
@@ -160,7 +160,7 @@ async function updateBooking(req, res) {
     const { carName, days, rentPerDay, status } = req.body;
     const { userId } = req.user;
 
-    // 1️⃣ Find booking
+    // Find booking
     const booking = await prisma.booking.findUnique({
       where: { id: Number(bookingId) },
     });
@@ -172,7 +172,7 @@ async function updateBooking(req, res) {
       });
     }
 
-    // 2️⃣ Ownership check
+    // Ownership check
     if (booking.userId !== userId) {
       return res.status(403).json({
         success: false,
@@ -180,7 +180,7 @@ async function updateBooking(req, res) {
       });
     }
 
-    // 3️⃣ Update status only
+    //Update status only
     if (status) {
       if (!["booked", "completed", "cancelled"].includes(status)) {
         return res.status(400).json({
@@ -202,7 +202,7 @@ async function updateBooking(req, res) {
       });
     }
 
-    // 4️⃣ Update booking details
+    //Update booking details
     if (!carName || !days || !rentPerDay) {
       return res.status(400).json({
         success: false,
@@ -249,7 +249,7 @@ async function deleteBooking(req, res) {
     const { bookingId } = req.params;
     const { userId } = req.user;
 
-    // 1️⃣ Find booking
+    // Find booking
     const booking = await prisma.booking.findUnique({
       where: { id: Number(bookingId) },
     });
@@ -261,7 +261,7 @@ async function deleteBooking(req, res) {
       });
     }
 
-    // 2️⃣ Ownership check
+    // Ownership check
     if (booking.userId !== userId) {
       return res.status(403).json({
         success: false,
@@ -269,7 +269,7 @@ async function deleteBooking(req, res) {
       });
     }
 
-    // 3️⃣ Delete booking
+    // Delete booking
     await prisma.booking.delete({
       where: { id: booking.id },
     });
