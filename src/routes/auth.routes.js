@@ -1,10 +1,7 @@
-//import express from "express";
 const express = require("express");
+const { testAuth } = require("../controllers/auth.controller");
 
 const router = express.Router();
-
-router.get("/test", (req, res) => {
-  res.send("Auth route is working");
-});
+router.get("/test", testAuth);
 
 module.exports = router;

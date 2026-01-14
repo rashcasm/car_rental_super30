@@ -1,8 +1,7 @@
 const express = require("express");
-const router = express.Router();
+const { testBooking } = require("../controllers/bookings.controller");
 
-router.get("/test", (req, res) => {
-  res.send("Bookings route is working");
-});
+const router = express.Router();
+router.get("/test", testBooking);
 
 module.exports = router;

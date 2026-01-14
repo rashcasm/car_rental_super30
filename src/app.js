@@ -1,6 +1,8 @@
 const express = require("express");
-const authRoutes = require("./routes/auth.routes");
 const bookingsRoutes = require("./routes/bookings.routes");
+const authRoutes = require("./routes/auth.routes");
+
+const { connectDB, disconnectDB, prisma } = require("./config/prisma");
 
 const app = express();
 app.use(express.json());
@@ -14,8 +16,7 @@ app.get("/", (req, res) => {
 app.use("/auth", authRoutes);
 app.use("/bookings", bookingsRoutes);
 
-module.exports = app;
+connectDB();
+disconnectDB();
 
-// ENDPOINTS NEEDED
-// AUTH - signup(post), login(post)
-// BOOKINGS - bookings(get/post/put/delete)
+module.exports = app;
